@@ -1,0 +1,74 @@
+// using common libraries
+using serialcomgame;
+using System;
+using System.Collections.Generic;
+using System.IO.Ports;
+using WindowsInput;
+using WindowsInput.Native;
+using System.Threading.Tasks;
+class Program
+{
+    static void Main (string[] args)
+    {
+        var inputsim = new InputSimulator();
+        double x = 0, y = 0, z = 0;
+        int n=0;
+        SerialPort serialPort = new SerialPort
+        {
+            PortName = "COM7", // Replace with your port name
+            BaudRate = 115200,   // Replace with the desired baud rate
+            Parity = Parity.None,
+            DataBits = 8,
+            StopBits = StopBits.One,
+            Handshake = Handshake.None
+        };
+        try
+        {
+            serialPort.Open();
+            Console.WriteLine("port opened");
+        }
+        catch { }
+        while (serialPort.IsOpen)
+        {
+
+            string data = serialPort.ReadLine().ToString();
+            n++;
+            double xyz = double.Parse(data);
+            Console.WriteLine("x="+x+" n ="+n+ " xyz ="+ xyz);
+            if (n==1)
+            {
+                x = xyz;
+            }
+            if (n == 2)
+            {
+                y = xyz;
+            }
+            if (n == 3)
+            {
+                z = xyz;
+            }
+            if (x>5) // change these values to change the sensitivity.
+            {
+                inputsim.Keyboard.KeyDown(VirtualKeyCode.VK_W);
+            }
+            else if (x<-5) {
+                inputsim.Keyboard.KeyDown(VirtualKeyCode.VK_S);
+            }
+            if (y > 5)
+            {
+                inputsim.Keyboard.KeyDown(VirtualKeyCode.RIGHT);
+            }
+            else if (y < -5)
+            {
+                inputsim.Keyboard.KeyDown(VirtualKeyCode.LEFT);
+            }
+            Thread.Sleep(50); // change this value to keep the key pressed for longer
+            inputsim.Keyboard.KeyUp(VirtualKeyCode.LEFT);
+            inputsim.Keyboard.KeyUp(VirtualKeyCode.RIGHT);
+            inputsim.Keyboard.KeyUp(VirtualKeyCode.VK_S);
+            inputsim.Keyboard.KeyUp(VirtualKeyCode.VK_W);
+            if (n == 3) n=0;
+            
+        }
+    }
+}
